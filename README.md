@@ -1,7 +1,7 @@
 # xray_astronomy
 Course assignment
 </p>
-If any questions, contack me.(Wechat or my mailbox(baotong@smail.nju.edu.cn))
+If any questions, please contact me.(Wechat or my mailbox(baotong@smail.nju.edu.cn))
 
 
 
