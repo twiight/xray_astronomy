@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-#syntax: python run_XMMspectra.py
 #written by Ben,modified by Tong
 # written on 2018-6-13 to run XMM products on SgrA PWN for 5 XMM obsID
+# modified on 2019-3-9 to be the pipeline for point source (dummpy users version,not recommended for research)
 # most recently updated in May 2019 for Sgr B2 XMM data sets
 # point source or extended source: change flag in afrgen: extendedsource=yes/no; currently set to no for point source
 
@@ -30,14 +30,6 @@ det3 = "pn"
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
-# export SAS_ODF=/Users/baotong/xmm/0111310101/ODF
-# cifbuild
-# odfingest
-# setenv SAS_CCF /Users/baotong/xmm/0111310101/cal/ccf.cif
-# setenv SAS_ODF /Users/baotong/xmm/0111310101/cal/0494_0111310101_SCX00000SUM.SAS
-# emchain
-# epchain
-# barycen withtable=yes table=pn_bary.fits: withsrccoordinates=yes srcra=32.46125 srcdec=-63.311111
 process=1
 spectra=1
 ra=174.6117668;dec=3.3686417

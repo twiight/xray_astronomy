@@ -1,5 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
+# written by Tong
+# extract the arrival time of photons in xmm data
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
@@ -19,9 +21,8 @@ import pandas as pd
 # path='/Volumes/pulsar/xmm_CV/'
 path='/Users/baotong/xmm/'
 def get_txt(obsID,mode,src):
-    reg_file=[]
     hdul_evt= fits.open(path+obsID+'/cal/'+mode+'_bary.fits')
-    #hdul_evt = fits.open(path + evt_list + '/' + 'timing/' + '4511_reproj_evt.fits')
+    # # Be careful! Different column if used for other satellite-----
     x=hdul_evt[1].data.field(5)
     y=hdul_evt[1].data.field(6)
     energy=hdul_evt[1].data.field(8)
@@ -29,9 +30,11 @@ def get_txt(obsID,mode,src):
     tstart=hdul_evt[1].header['TSTART']
     tstop=hdul_evt[1].header['TSTOP']
     #obs_ID=hdul_evt[0].data.field(11)
+    # #--------------------------------------------------------------
     #-----------read region from filename-----------------
     # def read_region(regname):
     #     #physics坐标
+    #     reg_file = []
     #     #with open(path+regname+'_s'+'.reg', 'r') as file_to_read:
     #     with open(path +obsID+ '/cal/'+regname + '.reg', 'r') as file_to_read:
     #         while True:
@@ -102,6 +105,7 @@ name=['HT_CAS','OY_CAR','QZ_VIR','RU_PEG','SS_AUR',
       'J1719_4100','J1817_2508','J1830_1232','XY_ARI']
 
 get_txt(obsID[2], mode[2], name[2])
+
 # for i in range(len(obsID)):
 #         #get_txt(obsID[i],mode[j],'src{0}'.format(str(i+14)))
 #     get_txt(obsID[i], mode[0], name[i])
