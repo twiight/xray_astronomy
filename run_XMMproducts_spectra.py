@@ -12,13 +12,11 @@ from pathlib import Path
 
 # ------obsID List---------------
 path="/Users/baotong/xmm"
-obsID1 = "0111310101"
-obsID2 = "0111970701"
-obsID3 = "0694641401"
+obsID1 = "0652290101"
 # -------------------------------
 
 # ------choose obsID-------------
-obsList = [obsID2]
+obsList = [obsID1]
 # -------------------------------
 
 # ------detName List-------------
@@ -31,8 +29,8 @@ det3 = "pn"
 detList = [det1,det2,det3]
 # -------------------------------
 process=1
-spectra=1
-ra=174.6117668;dec=3.3686417
+spectra=0
+ra=48.55417;dec=-22.594723
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -42,6 +40,7 @@ for obsID in obsList:
          print("continued")
       else:
          os.system("mkdir cal")
+         os.system("gunzip ODF/*.gz")
          #------------ set environment -----------------
          os.chdir("./cal")
          #cmd = "alias SAS_ODF=" + path +"/"+ obsID + "/ODF"
