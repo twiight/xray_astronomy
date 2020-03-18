@@ -144,18 +144,19 @@ DN_name=['HT_CAS','OY_CAR','QZ_VIR','RU_PEG','SS_AUR',
 
 IP_name=['AO_PSC','DW_CNC','FO_AQR','HT_CAM','J1509_6649',
          'J1649_3307','J1719_4100','J1817_2508','J1830_1232','XY_ARI']
-
+Polar_name=['EF_Eri','BM_CrB','FL_Cet','V379_Vir','CP_Tuc']
 period_DN=[6363.1008,5453.65,5218.56,32365.44,15793.91,
         6563.0304,6417.0144,7499.52,15348.7008,6704.64]
 period_IP=[14325.12,5166.1152,17457.984,5159.1168,21202.56,
            13020.48,14420.16,5514.048,19344.96,21833.0208]
+period_Polar=[4861.3824,5054.4,5228.5824,5305.9968,5342.2848]
 spin_IP=[805.2,2315.026,1254.284,514.6,809.42,
          597.920,1139.550,1660.8,1820,206.298]
 
-path='/Users/baotong/xmm/0111970701/'
-net_p=0.9  ##get from your spectra
-i=2
-dataname=DN_name[i]+'_pn'
-period=period_DN[i]
+path='/Users/baotong/xmm/0300870501/'
+net_p=0.7  ##get from your spectra
+i=1
+dataname=Polar_name[i]+'_pn'
+period=period_Polar[i]
 label=dataname
-phase_fold(path,path +'txt/'+dataname+'.txt', period, bin = 50, net_percent = net_p, shift = 0.6, label = label)
+phase_fold(path,path +'txt/'+dataname+'.txt', period, bin = 30, net_percent = net_p, shift = 0.5, label = label)

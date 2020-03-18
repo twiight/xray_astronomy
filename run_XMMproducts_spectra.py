@@ -12,7 +12,7 @@ from pathlib import Path
 
 # ------obsID List---------------
 path="/Users/baotong/xmm"
-obsID1 = "0652290101"
+obsID1 = "0145450201"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -24,13 +24,13 @@ det1 = "mos1"
 det2 = "mos2"
 det3 = "pn"
 # -------------------------------
-
+#
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
 process=1
 spectra=0
-ra=48.55417;dec=-22.594723
+ra=28.930834;dec=0.468611
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -89,9 +89,9 @@ for obsID in obsList:
    # # ---------------------------------------------
    #---------reg def------------------------------------
    # # ---------------------------------------------
-   srcName = "QZ_VIR"
-   srcReg = "circle(26354.489,27891.2,600.000)"
-   bkgReg = "annulus(26354.489,27891.2,1200.000,2400.000)"
+   srcName = "FL_Cet"
+   srcReg = "circle(26763.357,27703.057,300.00006)"
+   bkgReg = "annulus(26764.594,27694.656,600.00012,1200.0002)"
 
    if spectra:
       for det in detList:
@@ -100,6 +100,8 @@ for obsID in obsList:
 
          datapath = path+"/"+obsID+"/cal/"
          print(datapath)
+         os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
+
          if det == "pn":
              cmd = "evselect table="+datapath+det+".fits withfilteredset=yes expression='(PATTERN <= 12)&&(PI in [200:15000])&&#XMMEA_EP' filteredset="+datapath+det+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
          else:
