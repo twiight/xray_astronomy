@@ -12,7 +12,7 @@ from pathlib import Path
 
 # ------obsID List---------------
 path="/Users/baotong/xmm"
-obsID1 = "0145450201"
+obsID1 = "0079940101"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -28,9 +28,9 @@ det3 = "pn"
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
-process=1
-spectra=0
-ra=28.930834;dec=0.468611
+process=0
+spectra=1
+ra=348.8296;dec=-59.174442
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -89,9 +89,9 @@ for obsID in obsList:
    # # ---------------------------------------------
    #---------reg def------------------------------------
    # # ---------------------------------------------
-   srcName = "FL_Cet"
-   srcReg = "circle(26763.357,27703.057,300.00006)"
-   bkgReg = "annulus(26764.594,27694.656,600.00012,1200.0002)"
+   srcName = "CP_Tuc"
+   srcReg = "circle(27865.117,26114.44,300.00003)"
+   bkgReg = "annulus(27865.117,26114.436,599.99766,952.3585)"
 
    if spectra:
       for det in detList:

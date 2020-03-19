@@ -50,7 +50,7 @@ def get_txt(obsID,mode,src):
 
     # #-----------define region yourself-----------------
     # #----------(x,y,r) in physical coordinate----------
-    reg=[26354.489,27891.2,600.000]
+    reg=[27865.117,26114.44,300.00003]
     # #--------------------------------------------------
 
 
@@ -105,7 +105,7 @@ name=['HT_CAS','OY_CAR','QZ_VIR','RU_PEG','SS_AUR',
       'J1649_3307','J1719_4100','J1817_2508','J1830_1232','XY_ARI',
       'EF_Eri','BM_CrB','FL_Cet','V379_Vir','CP_Tuc']
 
-get_txt(obsID[21], mode[2], name[21])
+get_txt(obsID[24], mode[2], name[24])
 
 # for i in range(len(obsID)):
 #         #get_txt(obsID[i],mode[j],'src{0}'.format(str(i+14)))

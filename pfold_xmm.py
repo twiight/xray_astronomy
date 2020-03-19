@@ -153,9 +153,9 @@ period_Polar=[4861.3824,5054.4,5228.5824,5305.9968,5342.2848]
 spin_IP=[805.2,2315.026,1254.284,514.6,809.42,
          597.920,1139.550,1660.8,1820,206.298]
 
-path='/Users/baotong/xmm/0300870501/'
+path='/Users/baotong/xmm/0079940101/'
 net_p=0.7  ##get from your spectra
-i=1
+i=4
 dataname=Polar_name[i]+'_pn'
 period=period_Polar[i]
 label=dataname
