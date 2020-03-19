@@ -11,7 +11,8 @@ Run "run_XMMproducts_spectra.py" to process the data and get spectra.
 Run "xmm_fits_to_txt.py" and "pfold_xmm.py" in order to get phase-folded light curve.
 
 # Fit the spectra with model
-Query "XspecManual.pdf" for help
+Query "XspecManual.pdf" for help.
+
 Fit the spectra with mkcf with absorption.
 
 
