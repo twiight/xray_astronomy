@@ -9,7 +9,6 @@ import sys
 import os
 import string
 #import correct as correct
-from datetime import datetime
 from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.fftpack import fft,ifft

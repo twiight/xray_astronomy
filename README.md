@@ -1,4 +1,4 @@
-# xray_astronomy
+# Xray_astronomy
 Course assignment
 </p>
 If any questions, please contact me.(Wechat or my mailbox(baotong@smail.nju.edu.cn))
@@ -15,6 +15,7 @@ Query "XspecManual.pdf" for help.
 
 Fit the spectra with mkcf with absorption.
 
+Read xspec_abc.txt for detailed.
 
 
 

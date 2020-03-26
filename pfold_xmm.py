@@ -156,7 +156,7 @@ spin_IP=[805.2,2315.026,1254.284,514.6,809.42,
          597.920,1139.550,1660.8,1820,206.298]
 
 path='/Users/baotong/xmm/0079940101/'
-net_p=0.7  ##get from your spectra
+net_p=0.861  ##get from your spectra
 i=4
 dataname=Polar_name[i]+'_pn'
 period=period_Polar[i]
