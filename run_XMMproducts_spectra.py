@@ -12,7 +12,7 @@ from pathlib import Path
 
 # ------obsID List---------------
 path="/Users/baotong/xmm"
-obsID1 = "0079940101"
+obsID1 = "0111310101"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -28,9 +28,9 @@ det3 = "pn"
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
-process=0
-spectra=1
-ra=348.8296;dec=-59.174442
+process=1
+spectra=0
+ra=17.5546722;dec=60.0765248
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -88,10 +88,10 @@ for obsID in obsList:
    #You should open pn.fits and choose the region, saved in physical coordinate.
    # # ---------------------------------------------
    #---------reg def------------------------------------
-   # # ---------------------------------------------
-   srcName = "CP_Tuc"
-   srcReg = "circle(27865.117,26114.44,300.00003)"
-   bkgReg = "annulus(27865.117,26114.436,599.99766,952.3585)"
+   # ---------------------------------------------
+   srcName = "HT_CAS"
+   srcReg = "circle(23919.544,25422.411,500.00021)"
+   bkgReg = "annulus(23919.544,25422.411,1000.00021,2000.00021)"
 
    if spectra:
       for det in detList:
