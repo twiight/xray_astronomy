@@ -17,7 +17,7 @@ Fit the spectra with mkcf with absorption.
 
 Read xspec_abc.txt for detailed.
 
-#作业提交
+# 作业提交
 提交的光谱信息为图像（**.ps），参数拟合结果（截个图就行）以及highT的误差范围（示例如（4.23，10.78))
 
 另外请附上你的光谱文件以及响应文件。（*.pha，*.rmf，*.arf）
