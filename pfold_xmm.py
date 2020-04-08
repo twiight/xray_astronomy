@@ -111,7 +111,7 @@ def phase_fold(path,data_file,p_test,bin,net_percent,shift,label):
     ax1 = fig.add_subplot(111)
 
     bkg_x = [0, 2]
-    plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'yellow', alpha = 0.5)
+    plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'blue', alpha = 0.9)
 
     x2=np.concatenate((x,x+1))
     y2=np.concatenate((loc,loc))
@@ -155,10 +155,10 @@ period_Polar=[4861.3824,5054.4,5228.5824,5305.9968,5342.2848,
 spin_IP=[805.2,2315.026,1254.284,514.6,809.42,
          597.920,1139.550,1660.8,1820,206.298]
 
-path='/Users/baotong/xmm/0079940101/'
+path='/Users/baotong/xmm/0111970701/'
 net_p=0.861  ##get from your spectra
-i=4
-dataname=Polar_name[i]+'_pn'
-period=period_Polar[i]
+i=2
+dataname=DN_name[i]+'_pn'
+period=period_DN[i]
 label=dataname
-phase_fold(path,path +'txt/'+dataname+'.txt', period, bin = 30, net_percent = net_p, shift = 0.5, label = label)
+phase_fold(path,path +'txt/'+dataname+'.txt', period, bin = 100, net_percent = net_p, shift = 0.5, label = label)
