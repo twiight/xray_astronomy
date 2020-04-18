@@ -79,7 +79,7 @@ def phase_fold(path,data_file,p_test,bin,net_percent,shift,label):
     time = filter_energy(time, energy, [200, 10000])
 
     epoch_file=path+'txt/' +'epoch_'+dataname+'.txt'
-    T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, 0.0)
+    T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, shift*2*np.pi)
 
     def trans(t,p_test,shift):
         ti =t
@@ -161,4 +161,4 @@ i=2
 dataname=DN_name[i]+'_pn'
 period=period_DN[i]
 label=dataname
-phase_fold(path,path +'txt/'+dataname+'.txt', period, bin = 100, net_percent = net_p, shift = 0.5, label = label)
+phase_fold(path,path +'txt/'+dataname+'.txt', period, bin = 50, net_percent = net_p, shift = 0.5, label = label)
