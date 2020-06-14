@@ -25,7 +25,10 @@ Read xspec_abc.txt for detailed.
 
 另外请附上你的光谱文件以及响应文件。(*.pha, *.arf, *.rmf)
 
-请将上述文件做成压缩包后，发送到我的邮箱：baotong@smail.nju.edu.cn
+
+请将上述文件以及报告的pdf文件做成压缩包后，发送到我的邮箱：baotong@smail.nju.edu.cn
+
+
 
 
 
