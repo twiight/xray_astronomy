@@ -12,7 +12,7 @@ from pathlib import Path
 # ------obsID List---------------
 # path="/Users/baotong/xmm/M28_LMXB"
 path="/Users/baotong/xmm"
-obsID1 = "0201290301"
+obsID1 = "0302900101"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -28,11 +28,12 @@ det3 = "pn"
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
-process=1
+process=0
+lc=1
 spectra=0
 combine_spec=0
 
-ra=	146.1320162240025;dec=3.9681361647259
+ra=	210.83180 ;dec=-41.38297
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -91,9 +92,56 @@ for obsID in obsList:
    # # ---------------------------------------------
    #---------reg def------------------------------------
    # ---------------------------------------------
-   srcName = "VZ_Sex"
-   srcReg = "circle(25775.297,28004.397,400.00011)"
-   bkgReg = "annulus(25775.297,28004.397,800.00011,1600.00022)"
+   srcName = "AGN_1"
+   srcReg = "circle(25157.813,23961.173,400.00015)"
+   bkgReg = "circle(24731.488,26218.562,924.11068)"
+
+   if lc:
+      # you should run this step multiple times to determine the best tmin and tmax
+      lenbin=100;tmin=2.53566147603396E+08;tmax=2.53696495793804E+08
+      # read from lc
+      for det in detList:
+         print("running obsservation"+" "+obsID)
+         print("running detector"+" "+det)
+
+         datapath = path+"/"+obsID+"/cal/"
+         print(datapath)
+         os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
+         os.chdir(datapath)
+
+         if det == "pn":
+             cmd = "evselect table="+det+"_bary.fits energycolumn=PI " \
+                                                  "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+ ")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
+                   +det+"_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
+         else:
+            cmd = "evselect table=" + det + "_bary.fits energycolumn=PI " \
+                                                       "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + srcReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
+                  + det + "_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
+         print(" ")
+         print("1 extract src light curve")
+         print(cmd)
+         os.system(cmd)
+
+         if det == "pn":
+             cmd = "evselect table="+det+"_bary.fits energycolumn=PI " \
+                                                  "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
+                   +det+"_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
+         else:
+            cmd = "evselect table=" + det + "_bary.fits energycolumn=PI " \
+                                                       "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + bkgReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
+                  + det + "_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
+         print(" ")
+         print("2 extract bkg light curve")
+         print(cmd)
+         os.system(cmd)
+
+
+         cmd ="epiclccorr srctslist={0}_src_lc_bin{1}.lc eventlist={0}_bary.fits outset={0}_lccorr_bin{1}.lc bkgtslist={0}_bkg_lc_bin{1}.lc withbkgset=yes applyabsolutecorrections=yes".format(det,lenbin)
+
+         print(" ")
+         print("3 extract corrected light curve")
+         print(cmd)
+         os.system(cmd)
 
    if spectra:
       for det in detList:
@@ -105,7 +153,7 @@ for obsID in obsList:
          os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
 
          if det == "pn":
-             cmd = "evselect table="+datapath+det+".fits withfilteredset=yes expression='(PATTERN <= 12)&&(PI in [200:15000])&&#XMMEA_EP' filteredset="+datapath+det+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
+             cmd = "evselect table="+datapath+det+".fits withfilteredset=yes expression='(PATTERN <= 4)&&(PI in [200:15000])&&#XMMEA_EP' filteredset="+datapath+det+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
          else:
              cmd = "evselect table="+datapath+det+".fits withfilteredset=yes expression='(PATTERN <= 12)&&(PI in [200:12000])&&#XMMEA_EM' filteredset="+datapath+det+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
          print(" ")
@@ -124,7 +172,7 @@ for obsID in obsList:
          os.system(cmd)
 
          if det == "pn":
-             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
+             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+")'"
          else:
              cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
          print(" ")
@@ -132,7 +180,7 @@ for obsID in obsList:
          print(cmd)
          os.system(cmd)
          if det == "pn":
-             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=12) && ((X,Y) IN "+bkgReg+")'"
+             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")'"
          else:
              cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+bkgReg+")'"
          print(" ")
