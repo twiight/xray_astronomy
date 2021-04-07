@@ -4,15 +4,15 @@
 # modified on 2019-3-9 to be the pipeline for point source (dummpy users version,not recommended for research)
 # most recently updated in May 2019 for Sgr B2 XMM data sets
 # point source or extended source: change flag in afrgen: extendedsource=yes/no; currently set to no for point source
-
 import sys
 import os
 import string
 from pathlib import Path
 
 # ------obsID List---------------
+# path="/Users/baotong/xmm/M28_LMXB"
 path="/Users/baotong/xmm"
-obsID1 = "0744180801"
+obsID1 = "0201290301"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -28,9 +28,11 @@ det3 = "pn"
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
-process=0
-spectra=1
-ra=274.05542;dec=49.86778
+process=1
+spectra=0
+combine_spec=0
+
+ra=	146.1320162240025;dec=3.9681361647259
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -89,9 +91,9 @@ for obsID in obsList:
    # # ---------------------------------------------
    #---------reg def------------------------------------
    # ---------------------------------------------
-   srcName = "AM_Her"
-   srcReg = "circle(24467.1,24454.74,469.27025)"
-   bkgReg = "box(23395.74,28372.692,2119.68,1361.664,0)"
+   srcName = "VZ_Sex"
+   srcReg = "circle(25775.297,28004.397,400.00011)"
+   bkgReg = "annulus(25775.297,28004.397,800.00011,1600.00022)"
 
    if spectra:
       for det in detList:
@@ -120,6 +122,7 @@ for obsID in obsList:
          print("3 create det map")
          print(cmd)
          os.system(cmd)
+
          if det == "pn":
              cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
          else:
@@ -158,19 +161,41 @@ for obsID in obsList:
          print("9 create arf")
          print(cmd)
          os.system(cmd)
-         cmd="fparkey " + datapath+det+"_BKG_for"+srcName+".pha " +datapath+det+"_"+srcName+".pha " +"BACKFILE add=yes"
+         cmd="fparkey " +det+"_BKG_for"+srcName+".pha " +datapath+det+"_"+srcName+".pha " +"BACKFILE add=yes"
          print("10 add key")
          print(" ")
          print(cmd)
          os.system(cmd)
-         cmd="fparkey " + datapath+det+"_"+srcName+".rmf " +datapath+det+"_"+srcName+".pha " +"RESPFILE add=yes"
+         cmd="fparkey "+det+"_"+srcName+".rmf " +datapath+det+"_"+srcName+".pha " +"RESPFILE add=yes"
          print(" ")
          print(cmd)
          os.system(cmd)
-         cmd="fparkey " + datapath+det+"_"+srcName+".arf " + datapath + det + "_" + srcName + ".pha " + "ANCRFILE add=yes"
+         cmd="fparkey " +det+"_"+srcName+".arf " + datapath + det + "_" + srcName + ".pha " + "ANCRFILE add=yes"
          print(" ")
          print(cmd)
          os.system(cmd)
          print(" ")
          print(" ")
 
+
+
+   if combine_spec:
+      os.chdir("./cal")
+      cmd="epicspeccombine pha="+'"mos1_{0}.pha mos2_{0}.pha mos1_{0}_02.pha mos2_{0}_02.pha"'.format(srcName) \
+              +" bkg="+'"mos2_BKG_for{0}.pha mos2_BKG_for{0}.pha mos1_BKG_for{0}_02.pha mos2_BKG_for{0}_02.pha"'.format(srcName) \
+              +" rmf="+'"mos1_{0}.rmf mos2_{0}.rmf mos1_{0}_02.rmf mos2_{0}_02.rmf"'.format(srcName) \
+              +" arf="+'"mos1_{0}.arf mos2_{0}.arf mos1_{0}_02.arf mos2_{0}_02.arf"'.format(srcName) \
+              +" filepha="+'"src_spec_grp_mos_2obs.pha"'\
+              +" filebkg="+'"bkg_spec_grp_mos_2obs.pha"'\
+              +" filersp="+'"response_grp_mos_2obs.rmf"'
+      #print(cmd)
+      #os.system(cmd)
+      cmd = "fparkey " + "response_grp_mos_2obs.rmf " +  "src_spec_grp_mos_2obs.pha" + " RESPFILE add=yes"
+      print(cmd)
+      os.system(cmd)
+      cmd = "fparkey " + "bkg_spec_grp_mos_2obs.pha " + "src_spec_grp_mos_2obs.pha" + " BACKFILE add=yes"
+      print(cmd)
+      os.system(cmd)
+      cmd = "fparkey " + "None " + "src_spec_grp_mos_2obs.pha" + " ANCRFILE add=yes"
+      print(cmd)
+      os.system(cmd)
