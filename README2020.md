@@ -1,4 +1,4 @@
-# Xray_astronomy(2021)
+# Xray_astronomy(2020)
 Course assignment
 </p>
 If any questions, please contact me.(Wechat or my mailbox(baotong@smail.nju.edu.cn))
@@ -9,6 +9,8 @@ Read "xmm_abc_guide.pdf" first(chapter 5&6).
 Run "run_XMMproducts_spectra.py" to process the data and get spectra.
 
 Run "xmm_fits_to_txt.py" and "pfold_xmm.py" in order to get phase-folded light curve.
+
+感谢孙逸辰同学的提醒，由于信噪比非常高，背景level在光变曲线中太淡了看不出来。建议将pfold_xmm.py第114行中的颜色改为blue,alpha改为0.9。
 
 Note: 请下载最新的code，之前的pfold_xmm.py中有一些偏差，会影响light curve的精准度。
 # Fit the spectra with model
