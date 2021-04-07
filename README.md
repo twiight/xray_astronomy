@@ -14,7 +14,7 @@ Run "lc_analysis.py"  to do QPO-searching.
 # Fit the spectra with model
 Query "XspecManual.pdf" for help.
 
-Fit the spectra with power-law with absorption.
+Follow the specturm-fitting process of the reference if it has done the specturm analysis.
 
 Read xspec_abc.txt for detailed.
 
