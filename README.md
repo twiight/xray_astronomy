@@ -1,4 +1,4 @@
-# Xray_astronomy
+# Xray_astronomy(2020)
 Course assignment
 </p>
 If any questions, please contact me.(Wechat or my mailbox(baotong@smail.nju.edu.cn))
