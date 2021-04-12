@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-#written by Ben,modified by Tong
+#written by by Tong
 # written on 2018-6-13 to run XMM products on SgrA PWN for 5 XMM obsID
 # modified on 2019-3-9 to be the pipeline for point source (dummpy users version,not recommended for research)
-# most recently updated in May 2019 for Sgr B2 XMM data sets
+# modified on 2020-4-7 to add the extraction of light curve
+# modified on 2020-4-8 to add the particle background filtering
 # point source or extended source: change flag in afrgen: extendedsource=yes/no; currently set to no for point source
 import sys
 import os
@@ -12,7 +13,7 @@ from pathlib import Path
 # ------obsID List---------------
 # path="/Users/baotong/xmm/M28_LMXB"
 path="/Users/baotong/xmm"
-obsID1 = "0302900101"
+obsID1 = "0550540101"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -26,16 +27,18 @@ det3 = "pn"
 # -------------------------------
 #
 # ------choose det --------------
-detList = [det1,det2,det3]
+detList = [det3]
 # -------------------------------
 process=0
-lc=1
+lc=0
+filt_particle_bkg=0
 spectra=0
-combine_spec=0
+combine_spec=1
 
 ra=	210.83180 ;dec=-41.38297
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
+   mypath=Path("./cal")
    mypath=Path("./cal")
 
    if process:
@@ -92,13 +95,13 @@ for obsID in obsList:
    # # ---------------------------------------------
    #---------reg def------------------------------------
    # ---------------------------------------------
-   srcName = "AGN_1"
-   srcReg = "circle(25157.813,23961.173,400.00015)"
-   bkgReg = "circle(24731.488,26218.562,924.11068)"
+   srcName = "vcc1154_polygon"
+   srcReg = "polygon(27470.796,26038.611,28944.562,26300.957,29422.957,23638.92,28751.66,23515.463)"
+   bkgReg = "box(28379.915,30085.797,3837.5801,2113.1899,25.419907)"
 
    if lc:
       # you should run this step multiple times to determine the best tmin and tmax
-      lenbin=100;tmin=2.53566147603396E+08;tmax=2.53696495793804E+08
+      lenbin=100;tmin=3.454552920905518E8;tmax=3.455381259282582E8
       # read from lc
       for det in detList:
          print("running obsservation"+" "+obsID)
@@ -143,7 +146,8 @@ for obsID in obsList:
          print(cmd)
          os.system(cmd)
 
-   if spectra:
+   if filt_particle_bkg:
+      pn_threshold=0.5;mos_threshold=0.4
       for det in detList:
          print("running obsservation"+" "+obsID)
          print("running detector"+" "+det)
@@ -151,38 +155,85 @@ for obsID in obsList:
          datapath = path+"/"+obsID+"/cal/"
          print(datapath)
          os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
+         os.chdir(datapath)
 
          if det == "pn":
-             cmd = "evselect table="+datapath+det+".fits withfilteredset=yes expression='(PATTERN <= 4)&&(PI in [200:15000])&&#XMMEA_EP' filteredset="+datapath+det+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
+             cmd = "evselect table=pn.fits withrateset=Y rateset=rateEPIC_pn.fits maketimecolumn=Y " \
+                   "timebinsize=100 makeratecolumn=Y expression='#XMMEA_EP && (PI>10000&&PI<12000) && (PATTERN==0)'"
+
          else:
-             cmd = "evselect table="+datapath+det+".fits withfilteredset=yes expression='(PATTERN <= 12)&&(PI in [200:12000])&&#XMMEA_EM' filteredset="+datapath+det+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
+            cmd = "evselect table={0}.fits withrateset=Y rateset=rateEPIC_{0}.fits maketimecolumn=Y " \
+                   "timebinsize=100 makeratecolumn=Y expression='#XMMEA_EM && (PI>10000) && (PATTERN==0)'".format(det)
+         print(" ")
+         print("1 make lc")
+         print(cmd)
+         os.system(cmd)
+
+         if det == "pn":
+             cmd = "tabgtigen table=rateEPIC_pn.fits expression='RATE<={0}' gtiset=gti_pn.fits".format(pn_threshold)
+
+         else:
+            cmd = "tabgtigen table=rateEPIC_{0}.fits expression='RATE<={1}' gtiset=gti_{0}.fits".format(det,mos_threshold)
+         print(" ")
+         print("2 make GTI file")
+         print(cmd)
+         os.system(cmd)
+
+
+         if det == "pn":
+             cmd = "evselect table=pn.fits withfilteredset=yes expression='#XMMEA_EP && gti(gti_pn.fits,TIME) && (PI>150)' " \
+                   "filteredset=pn_filt_time.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
+         else:
+            cmd = "evselect table={0}.fits withfilteredset=yes expression=" \
+                  "'#XMMEA_EM && gti(gti_{0}.fits,TIME) && (PI>150)' filteredset={0}_filt_time.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes".format(det)
+
+         print(" ")
+         print("3 filter GTI fits")
+         print(cmd)
+         os.system(cmd)
+
+
+   if spectra:
+      for det in detList:
+         print("running obsservation"+" "+obsID)
+         print("running detector"+" "+det)
+         filt_label='_filt_time'
+
+         datapath = path+"/"+obsID+"/cal/"
+         print(datapath)
+         os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
+
+         if det == "pn":
+             cmd = "evselect table="+datapath+det+filt_label+".fits withfilteredset=yes expression='(PATTERN <= 4)&&(PI in [200:15000])&&#XMMEA_EP' filteredset="+datapath+det+filt_label+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
+         else:
+             cmd = "evselect table="+datapath+det+filt_label+".fits withfilteredset=yes expression='(PATTERN <= 12)&&(PI in [200:12000])&&#XMMEA_EM' filteredset="+datapath+det+filt_label+"_filt.fits filtertype=expression keepfilteroutput=yes updateexposure=yes filterexposure=yes"
          print(" ")
          print("1 filter by energy")
          print(cmd)
          os.system(cmd)
-         cmd = "evselect table="+datapath+det+"_filt.fits withimageset=yes imageset="+datapath+det+"_filt.img xcolumn=X ycolumn=Y imagebinning=imageSize ximagesize=600 yimagesize=600"
+         cmd = "evselect table="+datapath+det+filt_label+"_filt.fits withimageset=yes imageset="+datapath+det+filt_label+"_filt.img xcolumn=X ycolumn=Y imagebinning=imageSize ximagesize=600 yimagesize=600"
          print(" ")
          print("2 create det image")
          print(cmd)
          os.system(cmd)
-         cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' destruct=false withfilteredset=true withimageset=true imageset="+datapath+det+"_detmap.ds xcolumn=DETX ycolumn=DETY #withxranges=true ximagemin=-1500 ximagemax=1500 withyranges=true #yimagemin=-1500 yimagemax=1500 imagebinning='imageSize' #ximagesize=20 yimagesize=20 #writedss=true updateexposure=true"
+         cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' destruct=false withfilteredset=true withimageset=true imageset="+datapath+det+filt_label+"_detmap.ds xcolumn=DETX ycolumn=DETY #withxranges=true ximagemin=-1500 ximagemax=1500 withyranges=true #yimagemin=-1500 yimagemax=1500 imagebinning='imageSize' #ximagesize=20 yimagesize=20 #writedss=true updateexposure=true"
          print(" ")
          print("3 create det map")
          print(cmd)
          os.system(cmd)
 
          if det == "pn":
-             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+")'"
          else:
-             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
          print(" ")
          print("4 extract source spectrum")
          print(cmd)
          os.system(cmd)
          if det == "pn":
-             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")'"
          else:
-             cmd = "evselect table='"+datapath+det+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+bkgReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+bkgReg+")'"
          print(" ")
          print("5 extract background spectrum")
          print(cmd)
@@ -228,22 +279,41 @@ for obsID in obsList:
 
 
    if combine_spec:
-      os.chdir("./cal")
-      cmd="epicspeccombine pha="+'"mos1_{0}.pha mos2_{0}.pha mos1_{0}_02.pha mos2_{0}_02.pha"'.format(srcName) \
-              +" bkg="+'"mos2_BKG_for{0}.pha mos2_BKG_for{0}.pha mos1_BKG_for{0}_02.pha mos2_BKG_for{0}_02.pha"'.format(srcName) \
-              +" rmf="+'"mos1_{0}.rmf mos2_{0}.rmf mos1_{0}_02.rmf mos2_{0}_02.rmf"'.format(srcName) \
-              +" arf="+'"mos1_{0}.arf mos2_{0}.arf mos1_{0}_02.arf mos2_{0}_02.arf"'.format(srcName) \
-              +" filepha="+'"src_spec_grp_mos_2obs.pha"'\
-              +" filebkg="+'"bkg_spec_grp_mos_2obs.pha"'\
-              +" filersp="+'"response_grp_mos_2obs.rmf"'
-      #print(cmd)
-      #os.system(cmd)
-      cmd = "fparkey " + "response_grp_mos_2obs.rmf " +  "src_spec_grp_mos_2obs.pha" + " RESPFILE add=yes"
+      datapath = path + "/" + obsID + "/cal/"
+      os.chdir(datapath+'add_2obs_spec/')
+      srcName='vcc1154_polygon'
+      # cmd="epicspeccombine pha="+'"mos1_{0}.pha mos2_{0}.pha mos1_{0}_02.pha mos2_{0}_02.pha"'.format(srcName) \
+      #         +" bkg="+'"mos2_BKG_for{0}.pha mos2_BKG_for{0}.pha mos1_BKG_for{0}_02.pha mos2_BKG_for{0}_02.pha"'.format(srcName) \
+      #         +" rmf="+'"mos1_{0}.rmf mos2_{0}.rmf mos1_{0}_02.rmf mos2_{0}_02.rmf"'.format(srcName) \
+      #         +" arf="+'"mos1_{0}.arf mos2_{0}.arf mos1_{0}_02.arf mos2_{0}_02.arf"'.format(srcName) \
+      #         +" filepha="+'"src_spec_grp_mos_2obs.pha"'\
+      #         +" filebkg="+'"bkg_spec_grp_mos_2obs.pha"'\
+      #         +" filersp="+'"response_grp_mos_2obs.rmf"'
+
+      cmd="epicspeccombine pha="+'"mos1_{0}.pha mos2_{0}.pha mos1_{0}_obs2.pha mos2_{0}_obs2.pha "'.format(srcName) \
+              +" bkg="+'"mos1_BKG_for{0}.pha mos2_BKG_for{0}.pha mos2_BKG_for{0}_obs2.pha mos2_BKG_for{0}_obs2.pha "'.format(srcName) \
+              +" rmf="+'"mos1_{0}.rmf mos2_{0}.rmf mos1_{0}_obs2.rmf mos2_{0}_obs2.rmf"'.format(srcName) \
+              +" arf="+'"mos1_{0}.arf mos2_{0}.arf mos1_{0}_obs2.arf mos2_{0}_obs2.arf"'.format(srcName) \
+              +" filepha="+'"merge_2obs_mos_src.pha"'\
+              +" filebkg="+'"merge_2obs_mos_bkg.pha"'\
+              +" filersp="+'"response_merge_2obs_mos.rmf"'
+
+      # cmd="epicspeccombine pha="+'"pn_{0}.pha pn_{0}_obs2.pha "'.format(srcName) \
+      #         +" bkg="+'"pn_BKG_for{0}.pha pn_BKG_for{0}_obs2.pha "'.format(srcName) \
+      #         +" rmf="+'"pn_{0}.rmf pn_{0}_obs2.rmf"'.format(srcName) \
+      #         +" arf="+'"pn_{0}.arf pn_{0}_obs2.arf"'.format(srcName) \
+      #         +" filepha="+'"merge_2obs_pn_src.pha"'\
+      #         +" filebkg="+'"merge_2obs_pn_bkg.pha"'\
+      #         +" filersp="+'"response_merge_2obs_pn.rmf"'
+
       print(cmd)
       os.system(cmd)
-      cmd = "fparkey " + "bkg_spec_grp_mos_2obs.pha " + "src_spec_grp_mos_2obs.pha" + " BACKFILE add=yes"
+      cmd = "fparkey " + "response_merge_2obs_mos.rmf " + "merge_2obs_mos_src.pha" + " RESPFILE add=yes"
       print(cmd)
       os.system(cmd)
-      cmd = "fparkey " + "None " + "src_spec_grp_mos_2obs.pha" + " ANCRFILE add=yes"
+      cmd = "fparkey " + "merge_2obs_mos_bkg.pha " + "merge_2obs_mos_src.pha" + " BACKFILE add=yes"
+      print(cmd)
+      os.system(cmd)
+      cmd = "fparkey " + "None " + "merge_2obs_mos_src.pha" + " ANCRFILE add=yes"
       print(cmd)
       os.system(cmd)
