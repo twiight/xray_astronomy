@@ -13,7 +13,7 @@ from pathlib import Path
 # ------obsID List---------------
 # path="/Users/baotong/xmm/M28_LMXB"
 path="/Users/baotong/xmm"
-obsID1 = "0550540101"
+obsID1 = "0506440101"
 # -------------------------------
 
 # ------choose obsID-------------
@@ -27,15 +27,16 @@ det3 = "pn"
 # -------------------------------
 #
 # ------choose det --------------
-detList = [det3]
+detList = [det1,det2,det3]
 # -------------------------------
 process=0
 lc=0
 filt_particle_bkg=0
-spectra=0
-combine_spec=1
+spectra=1
+combine_spec=0
+ra=158.6608260198968;
+dec=39.6411571435408
 
-ra=	210.83180 ;dec=-41.38297
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
    mypath=Path("./cal")
@@ -95,9 +96,9 @@ for obsID in obsList:
    # # ---------------------------------------------
    #---------reg def------------------------------------
    # ---------------------------------------------
-   srcName = "vcc1154_polygon"
-   srcReg = "polygon(27470.796,26038.611,28944.562,26300.957,29422.957,23638.92,28751.66,23515.463)"
-   bkgReg = "box(28379.915,30085.797,3837.5801,2113.1899,25.419907)"
+   srcName = "RE1034"
+   srcReg = "circle(26542.913,27746.285,900.00032)"
+   bkgReg = "circle(29579.517,23754.03,1206.8039)"
 
    if lc:
       # you should run this step multiple times to determine the best tmin and tmax
@@ -223,28 +224,32 @@ for obsID in obsList:
          os.system(cmd)
 
          if det == "pn":
-             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes " \
+                                                              "spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+")'"
          else:
-             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes " \
+                                                              "spectrumset="+datapath+det+"_"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+srcReg+")'"
          print(" ")
          print("4 extract source spectrum")
          print(cmd)
          os.system(cmd)
          if det == "pn":
-             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes " \
+                                                              "spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=5 withspecranges=yes specchannelmin=0 specchannelmax=20479 expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")'"
          else:
-             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+bkgReg+")'"
+             cmd = "evselect table='"+datapath+det+filt_label+"_filt.fits:EVENTS' withspectrumset=yes " \
+                                                              "spectrumset="+datapath+det+"_BKG_for"+srcName+".pha energycolumn=PI spectralbinsize=15 withspecranges=yes specchannelmin=0 specchannelmax=11999 expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN "+bkgReg+")'"
          print(" ")
          print("5 extract background spectrum")
          print(cmd)
          os.system(cmd)
 
-         cmd = "backscale spectrumset="+datapath+det+"_"+srcName+".pha badpixlocation="+datapath+det+"_filt.fits"
+         cmd = "backscale spectrumset="+datapath+det+"_"+srcName+".pha badpixlocation="+datapath+det+filt_label+"_filt.fits"
          print(" ")
          print("6 create source backscale keyword")
          print(cmd)
          os.system(cmd)
-         cmd = "backscale spectrumset="+datapath+det+"_BKG_for"+srcName+".pha badpixlocation="+datapath+det+"_filt.fits"
+         cmd = "backscale spectrumset="+datapath+det+"_BKG_for"+srcName+".pha badpixlocation="+datapath+det+filt_label+"_filt.fits"
          print(" ")
          print("7 create background backscale keyword")
          print(cmd)
@@ -255,7 +260,8 @@ for obsID in obsList:
          print("8 create rmf")
          print(cmd)
          os.system(cmd)
-         cmd = "arfgen spectrumset="+datapath+det+"_"+srcName+".pha arfset="+datapath+det+"_"+srcName+".arf withrmfset=yes rmfset="+datapath+det+"_"+srcName+".rmf badpixlocation="+datapath+det+"_filt.fits extendedsource=yes detmaptype=dataset detmaparray="+datapath+det+"_detmap.ds"
+         cmd = "arfgen spectrumset="+datapath+det+"_"+srcName+".pha arfset="+datapath+det+"_"+srcName+".arf withrmfset=yes " \
+                                                                                                      "rmfset="+datapath+det+"_"+srcName+".rmf badpixlocation="+datapath+det+filt_label+"_filt.fits extendedsource=yes detmaptype=dataset detmaparray="+datapath+det+filt_label+"_detmap.ds"
          print(" ")
          print("9 create arf")
          print(cmd)
