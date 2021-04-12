@@ -9,6 +9,7 @@ import sys
 import os
 import string
 from pathlib import Path
+from astropy.io import fits
 
 # ------obsID List---------------
 # path="/Users/baotong/xmm/M28_LMXB"
@@ -178,11 +179,11 @@ for obsID in obsList:
             tmax=event[1].header['TSTOP']
 
          if det == "pn":
-             cmd = "evselect table="+det+"_filt_time.fits energycolumn=PI " \
+             cmd = "evselect table="+det+"_filt_time_bary.fits energycolumn=PI " \
                                                   "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+ ")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
                    +det+"_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
          else:
-            cmd = "evselect table=" + det + "_filt_time.fits energycolumn=PI " \
+            cmd = "evselect table=" + det + "_filt_time_bary.fits energycolumn=PI " \
                                                        "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + srcReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
                   + det + "_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
          print(" ")
@@ -191,11 +192,11 @@ for obsID in obsList:
          os.system(cmd)
 
          if det == "pn":
-             cmd = "evselect table="+det+"_filt_time.fits energycolumn=PI " \
+             cmd = "evselect table="+det+"_filt_time_bary.fits energycolumn=PI " \
                                                   "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
                    +det+"_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
          else:
-            cmd = "evselect table=" + det + "_filt_time.fits energycolumn=PI " \
+            cmd = "evselect table=" + det + "_filt_time_bary.fits energycolumn=PI " \
                                                        "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + bkgReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
                   + det + "_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
          print(" ")
@@ -204,7 +205,7 @@ for obsID in obsList:
          os.system(cmd)
 
 
-         cmd ="epiclccorr srctslist={0}_src_lc_bin{1}.lc eventlist={0}_bary.fits outset={0}_lccorr_bin{1}.lc bkgtslist={0}_bkg_lc_bin{1}.lc withbkgset=yes applyabsolutecorrections=yes".format(det,lenbin)
+         cmd ="epiclccorr srctslist={0}_src_lc_bin{1}.lc eventlist={0}_filt_time_bary.fits outset={0}_lccorr_bin{1}.lc bkgtslist={0}_bkg_lc_bin{1}.lc withbkgset=yes applyabsolutecorrections=yes".format(det,lenbin)
 
          print(" ")
          print("3 extract corrected light curve")
