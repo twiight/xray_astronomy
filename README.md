@@ -4,6 +4,7 @@ Course assignment
 If any questions, please contact me.(Wechat or my mailbox(baotong@smail.nju.edu.cn))
 
 # Analysis 
+https://www.cosmos.esa.int/web/xmm-newton/sas-threads
 Read "xmm_abc_guide.pdf" first(chapter 5&6).
 
 Run "run_XMMproducts_spectra.py" to process the data, extract the light curve and spectra.
