@@ -30,10 +30,11 @@ det3 = "pn"
 detList = [det1,det2,det3]
 # -------------------------------
 process=0
-lc=0
 filt_particle_bkg=0
-spectra=1
+lc=1
+spectra=0
 combine_spec=0
+
 ra=158.6608260198968;
 dec=39.6411571435408
 
@@ -100,53 +101,6 @@ for obsID in obsList:
    srcReg = "circle(26542.913,27746.285,900.00032)"
    bkgReg = "circle(29579.517,23754.03,1206.8039)"
 
-   if lc:
-      # you should run this step multiple times to determine the best tmin and tmax
-      lenbin=100;tmin=3.454552920905518E8;tmax=3.455381259282582E8
-      # read from lc
-      for det in detList:
-         print("running obsservation"+" "+obsID)
-         print("running detector"+" "+det)
-
-         datapath = path+"/"+obsID+"/cal/"
-         print(datapath)
-         os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
-         os.chdir(datapath)
-
-         if det == "pn":
-             cmd = "evselect table="+det+"_bary.fits energycolumn=PI " \
-                                                  "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+ ")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
-                   +det+"_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
-         else:
-            cmd = "evselect table=" + det + "_bary.fits energycolumn=PI " \
-                                                       "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + srcReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
-                  + det + "_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
-         print(" ")
-         print("1 extract src light curve")
-         print(cmd)
-         os.system(cmd)
-
-         if det == "pn":
-             cmd = "evselect table="+det+"_bary.fits energycolumn=PI " \
-                                                  "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
-                   +det+"_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
-         else:
-            cmd = "evselect table=" + det + "_bary.fits energycolumn=PI " \
-                                                       "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + bkgReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
-                  + det + "_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
-         print(" ")
-         print("2 extract bkg light curve")
-         print(cmd)
-         os.system(cmd)
-
-
-         cmd ="epiclccorr srctslist={0}_src_lc_bin{1}.lc eventlist={0}_bary.fits outset={0}_lccorr_bin{1}.lc bkgtslist={0}_bkg_lc_bin{1}.lc withbkgset=yes applyabsolutecorrections=yes".format(det,lenbin)
-
-         print(" ")
-         print("3 extract corrected light curve")
-         print(cmd)
-         os.system(cmd)
-
    if filt_particle_bkg:
       pn_threshold=0.5;mos_threshold=0.4
       for det in detList:
@@ -192,6 +146,71 @@ for obsID in obsList:
          print("3 filter GTI fits")
          print(cmd)
          os.system(cmd)
+
+   if lc:
+      # you should run this step multiple times to determine the best tmin and tmax
+      lenbin=100;tmin=0;tmax=0
+      ## you can also specify the tmin and tmax (read from lc)
+      ## otherwise they would be total duration
+      for det in detList:
+
+         print("running obsservation"+" "+obsID)
+         print("running detector"+" "+det)
+
+         datapath = path+"/"+obsID+"/cal/"
+         print(datapath)
+         os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
+         os.chdir(datapath)
+         ##------barycen-----##
+         cmd = "cp " + det + "_filt_time.fits " + det + "_filt_time_bary.fits"
+         print(cmd)
+         os.system(cmd)
+         cmd = "barycen withtable=yes table=" + det + "_filt_time_bary.fits" + ": withsrccoordinates=yes srcra=" + str(
+            ra) + " srcdec=" + str(dec)
+         print(cmd)
+         os.system(cmd)
+         print("0 barycenter correction for cleaned events")
+
+         ##------------------##
+         if tmin==0 and tmax==0:
+            event=fits.open(det+"_filt_time_bary.fits")
+            tmin=event[1].header['TSTART']
+            tmax=event[1].header['TSTOP']
+
+         if det == "pn":
+             cmd = "evselect table="+det+"_filt_time.fits energycolumn=PI " \
+                                                  "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+srcReg+ ")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
+                   +det+"_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
+         else:
+            cmd = "evselect table=" + det + "_filt_time.fits energycolumn=PI " \
+                                                       "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + srcReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
+                  + det + "_src_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
+         print(" ")
+         print("1 extract src light curve")
+         print(cmd)
+         os.system(cmd)
+
+         if det == "pn":
+             cmd = "evselect table="+det+"_filt_time.fits energycolumn=PI " \
+                                                  "expression='#XMMEA_EP && (PATTERN<=4) && ((X,Y) IN "+bkgReg+")"+" &&(PI in [200:10000])' withrateset=yes rateset="\
+                   +det+"_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin,tmin,tmax)
+         else:
+            cmd = "evselect table=" + det + "_filt_time.fits energycolumn=PI " \
+                                                       "expression='#XMMEA_EM && (PATTERN<=12) && ((X,Y) IN " + bkgReg + ")"+" &&(PI in [200:10000])' withrateset=yes rateset=" \
+                  + det + "_bkg_lc_bin{0}.lc timebinsize={0} maketimecolumn=yes makeratecolumn=yes timemin={1} timemax={2}".format(lenbin, tmin, tmax)
+         print(" ")
+         print("2 extract bkg light curve")
+         print(cmd)
+         os.system(cmd)
+
+
+         cmd ="epiclccorr srctslist={0}_src_lc_bin{1}.lc eventlist={0}_bary.fits outset={0}_lccorr_bin{1}.lc bkgtslist={0}_bkg_lc_bin{1}.lc withbkgset=yes applyabsolutecorrections=yes".format(det,lenbin)
+
+         print(" ")
+         print("3 extract corrected light curve")
+         print(cmd)
+         os.system(cmd)
+
 
 
    if spectra:
