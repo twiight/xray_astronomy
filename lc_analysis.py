@@ -40,19 +40,11 @@ def filter_energy(time,energy,band):
 def get_LS(time, flux,freq):
     x = time
     y = flux
-    print(x)
-    print(y)
-    # dy=np.sqrt(y)
-    # plt.scatter(x,y)
-    # plt.show()
 
     # LS = LombScargle(x, y, dy = 1, normalization = 'standard', fit_mean = True,
     #                  center_data = True).power(freq, method = 'cython')
     LS = LombScargle(x, y,normalization = 'standard')
     power = LS.power(freq)
-    print(power)
-
-    # print('freq_num={0}'.format(len(freq)))
     FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_99 = LS.false_alarm_level(0.0027, minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_90 = LS.false_alarm_level(0.05,  minimum_frequency=freq[0],
@@ -73,6 +65,7 @@ def get_LS(time, flux,freq):
     res=1e5*power
     res=np.round(res,2)
     return [FP, 1. / freq[np.where(power == np.max(power))],np.max(power),res]
+
 def plot_pds(time,flux):
     lc = Lightcurve(time, flux)
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
@@ -130,7 +123,7 @@ def read_SAS_lc():
     lc3=fits.open(filename3)
     # time1=lc1[1].data['TIME'][0:-100];rate1=lc1[1].data['RATE'][0:-100]
     # time2=lc2[1].data['TIME'][0:-100];rate2=lc2[1].data['RATE'][0:-100]
-    time3=lc3[1].data['TIME'][10000:-50000];rate3=lc3[1].data['RATE'][10000:-50000]
+    time3=lc3[1].data['TIME'][20000:-50000];rate3=lc3[1].data['RATE'][20000:-50000]
     rate3=np.nan_to_num(rate3)
     rate3[np.where(rate3<0)]=0
     freq=np.arange(1./10000,0.5/dt,1./(10*100000))
