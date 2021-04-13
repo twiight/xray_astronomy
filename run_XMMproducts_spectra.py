@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#written by by Tong
+#written by Ben; modified by Tong Bao
 # written on 2018-6-13 to run XMM products on SgrA PWN for 5 XMM obsID
 # modified on 2019-3-9 to be the pipeline for point source (dummpy users version,not recommended for research)
 # modified on 2020-4-7 to add the extraction of light curve

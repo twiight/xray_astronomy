@@ -109,7 +109,6 @@ def plot_pds(time,flux):
         ax1.spines[axis].set_linewidth(1.5)
     plt.show()
 
-
 def read_SAS_lc():
     # 1,2,3分别代表mos1,mos2,pn的light curve，也可以加起来用，记为_all;
     # 根据实际情况来决定lomb-scargle的输入
