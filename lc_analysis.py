@@ -113,8 +113,10 @@ def plot_pds(time,flux):
 def read_SAS_lc():
     # 1,2,3分别代表mos1,mos2,pn的light curve，也可以加起来用，记为_all;
     # 根据实际情况来决定lomb-scargle的输入
-    dt = 1
-    path='/Users/baotong/xmm/0302900101/cal/'
+
+    # 要注意的是，如果在run_XMMproducts_spectra.py中没有自行指定tmin和tmax，这里就不能直接对三个detector的lc进行加减
+    dt = 100
+    path='/Users/baotong/xmm/0506440101/cal/'
     os.chdir(path)
     mode=['mos1','mos2','pn']
     filename1=mode[0]+'_lccorr_bin{0}.lc'.format(int(dt));filename2=mode[1]+'_lccorr_bin{0}.lc'.format(int(dt));filename3=mode[2]+'_lccorr_bin{0}.lc'.format(int(dt))
@@ -123,13 +125,15 @@ def read_SAS_lc():
     lc3=fits.open(filename3)
     # time1=lc1[1].data['TIME'][0:-100];rate1=lc1[1].data['RATE'][0:-100]
     # time2=lc2[1].data['TIME'][0:-100];rate2=lc2[1].data['RATE'][0:-100]
-    time3=lc3[1].data['TIME'][20000:-50000];rate3=lc3[1].data['RATE'][20000:-50000]
+    time3=lc3[1].data['TIME'];rate3=lc3[1].data['RATE']
     rate3=np.nan_to_num(rate3)
     rate3[np.where(rate3<0)]=0
     freq=np.arange(1./10000,0.5/dt,1./(10*100000))
 
     time_all=time3;rate_all=rate3
+    index_gti=np.where(rate_all>0)
+    time_all=time_all[index_gti];rate_all=rate_all[index_gti]
     get_LS(time_all,rate_all,freq)
-    # plot_pds(time_all,rate_all)
+    plot_pds(time_all,rate_all)
 read_SAS_lc()
 
