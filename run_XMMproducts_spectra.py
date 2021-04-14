@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #written by Ben; modified by Tong Bao
 # written on 2018-6-13 to run XMM products on SgrA PWN for 5 XMM obsID
-# modified on 2019-3-9 to be the pipeline for point source (dummpy users version,not recommended for research)
+# modified on 2019-3-9 to be the pipeline for point source (dummy users version,not recommended for research)
 # modified on 2020-4-7 to add the extraction of light curve
 # modified on 2020-4-8 to add the particle background filtering
 # point source or extended source: change flag in afrgen: extendedsource=yes/no; currently set to no for point source
@@ -30,9 +30,9 @@ det3 = "pn"
 # ------choose det --------------
 detList = [det1,det2,det3]
 # -------------------------------
-process=0
+process=1
 filt_particle_bkg=0
-lc=1
+lc=0
 spectra=0
 combine_spec=0
 

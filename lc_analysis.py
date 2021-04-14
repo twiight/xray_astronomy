@@ -1,7 +1,6 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 # written by Tong
-# plot the phase-folded light curve from txt file (version for xmm)
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
@@ -151,7 +150,7 @@ def read_SAS_lc():
     index_gti=np.where(rate_all>0)
     time_all=time_all[index_gti];rate_all=rate_all[index_gti]
     phase_fold(time_all,rate_all,3733)
-    # get_LS(time_all,rate_all,freq)
-    # plot_pds(time_all,rate_all)
+    get_LS(time_all,rate_all,freq)
+    plot_pds(time_all,rate_all)
 read_SAS_lc()
 
