@@ -21,6 +21,21 @@ from stingray import Lightcurve, Powerspectrum, AveragedPowerspectrum
 font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 16, }
+def phase_fold(time,rate,period,binnumber=10):
+    turns=time*1/period-(time*1/period).astype('int')
+    fluxmean=np.zeros(binnumber)
+    for i in range(len(fluxmean)):
+        fluxmean[i]=np.mean(rate[np.where((turns<(i+1)/binnumber)&(turns>i/binnumber))])
+    x=np.linspace(0,1,binnumber+1)
+    x=x[:-1]
+
+    x2=np.concatenate((x,x+1));y2=np.concatenate((fluxmean,fluxmean))
+    ## 为了画出来漂亮一些，仅此而已
+    plt.step(x2,y2)
+    plt.xlabel('Phase',font1)
+    plt.ylabel('Count rate (counts s-1)',font1)
+    plt.tick_params(labelsize=16)
+    plt.show()
 
 def filter_energy(time,energy,band):
     T=time
@@ -40,6 +55,7 @@ def filter_energy(time,energy,band):
 def get_LS(time, flux,freq):
     x = time
     y = flux
+    plt.figure(1,(9,6))
 
     # LS = LombScargle(x, y, dy = 1, normalization = 'standard', fit_mean = True,
     #                  center_data = True).power(freq, method = 'cython')
@@ -55,12 +71,14 @@ def get_LS(time, flux,freq):
     plt.plot([freq[0], freq[-1]], [FP_90, FP_90], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
 
-    plt.title('FP={0}'.format(FP))
+    plt.title('FP={0}'.format(FP),font1)
     plt.semilogx()
     # plt.xlim(1000.,1500.)
     plt.plot(freq, power)
     print(1./freq[np.where(power==np.max(power))])
-
+    plt.xlabel('frequency',font1)
+    plt.ylabel('normalized LSP',font1)
+    plt.tick_params(labelsize=16)
     plt.show()
     res=1e5*power
     res=np.round(res,2)
@@ -132,7 +150,8 @@ def read_SAS_lc():
     time_all=time3;rate_all=rate3
     index_gti=np.where(rate_all>0)
     time_all=time_all[index_gti];rate_all=rate_all[index_gti]
-    get_LS(time_all,rate_all,freq)
-    plot_pds(time_all,rate_all)
+    phase_fold(time_all,rate_all,3733)
+    # get_LS(time_all,rate_all,freq)
+    # plot_pds(time_all,rate_all)
 read_SAS_lc()
 
