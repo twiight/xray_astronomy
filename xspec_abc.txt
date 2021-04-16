@@ -12,7 +12,7 @@ cpd /xw          ##新建窗口
 ignore **-0.5    ##忽略小于0.5keV和大于10keV的光谱
 ignore 10.-**    ##这里的数值请根据自己光谱的图像来调节
 pl ld            ##plot ldata的缩写，取对数并画图
-mo tb*(zpowerlaw+bbody) ##拟合模型，模型为tbabs*(zpowerlw+bbody)
+mo tb*(zpowerlw+bbody) ##拟合模型，模型为tbabs*(zpowerlw+bbody)
 ##这个操作以后一直敲回车，跳过参数的初始值设置##
 new 4 0.042 0      ##将红移固定在0.042处（这取决于你做的源），第二个0是与freeze 4同等的效果
 new 7 1e-5 0          ##将redshift固定在1e-5处，第二个0是与freeze 7同等的效果

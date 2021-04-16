@@ -7,7 +7,6 @@ from astropy.io import fits
 import sys
 import os
 import string
-#import correct as correct
 from datetime import datetime
 from scipy.interpolate import lagrange
 from scipy import interpolate
@@ -20,7 +19,9 @@ from stingray import Lightcurve, Powerspectrum, AveragedPowerspectrum
 font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 16, }
+
 def phase_fold(time,rate,period,binnumber=10):
+    ## 周期折叠，period为这个源QPO的周期 ##
     turns=time*1/period-(time*1/period).astype('int')
     fluxmean=np.zeros(binnumber)
     for i in range(len(fluxmean)):
@@ -52,6 +53,7 @@ def filter_energy(time,energy,band):
                 i+=1
     return T
 def get_LS(time, flux,freq):
+    ## Lomb-Scagrle周期图算法，参考VanderPlas J. T., 2018, ApJS, 236, 16 ##
     x = time
     y = flux
     plt.figure(1,(9,6))
@@ -72,7 +74,8 @@ def get_LS(time, flux,freq):
 
     plt.title('FP={0}'.format(FP),font1)
     plt.semilogx()
-    # plt.xlim(1000.,1500.)
+    plt.xlabel('frequency (Hz)')
+    plt.ylabel('Normalized Lomb-Scargle power')
     plt.plot(freq, power)
     print(1./freq[np.where(power==np.max(power))])
     plt.xlabel('frequency',font1)
@@ -84,23 +87,25 @@ def get_LS(time, flux,freq):
     return [FP, 1. / freq[np.where(power == np.max(power))],np.max(power),res]
 
 def plot_pds(time,flux):
+    ## 画光变曲线，即光子流量随时间的变化 ##
     lc = Lightcurve(time, flux)
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
     ax.plot(lc.time, lc.counts, lw=2, color='blue')
     ax.set_xlabel("Time (s)", fontproperties=font1)
-    ax.set_ylabel("Counts (cts)", fontproperties=font1)
+    ax.set_ylabel("Counts (cts)/bin", fontproperties=font1)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)
     ax.tick_params(which='major', width=1.5, length=7)
     ax.tick_params(which='minor', width=1.5, length=4)
     plt.show()
 
+    ## 画功率谱图 ##
     ps = Powerspectrum(lc,norm='leahy')
     fig, ax1 = plt.subplots(1, 1, figsize=(9, 6), sharex=True)
     ax1.loglog()
     ax1.step(ps.freq, ps.power, lw=2, color='blue')
     ax1.set_ylabel("Frequency (Hz)", fontproperties=font1)
-    ax1.set_ylabel("Power (raw)", fontproperties=font1)
+    ax1.set_ylabel("Power ", fontproperties=font1)
     ax1.set_yscale('log')
     ax1.tick_params(axis='x', labelsize=16)
     ax1.tick_params(axis='y', labelsize=16)
@@ -110,13 +115,15 @@ def plot_pds(time,flux):
         ax1.spines[axis].set_linewidth(1.5)
     plt.show()
 
+
+    ## 画average的功率谱，对于绝大多数的源不需要做这张图，除非所给的参考文献中有做average power density spectrum ###
     avg_ps = AveragedPowerspectrum(lc, 500,dt=lc.time[1]-lc.time[0],norm='leahy')
     print("Number of segments: %d" % avg_ps.m)
     fig, ax1 = plt.subplots(1, 1, figsize=(9, 6))
     ax1.loglog()
     ax1.step(avg_ps.freq, avg_ps.power, lw=2, color='blue')
     ax1.set_xlabel("Frequency (Hz)", fontproperties=font1)
-    ax1.set_ylabel("Power (raw)", fontproperties=font1)
+    ax1.set_ylabel("Power ", fontproperties=font1)
     ax1.set_yscale('log')
     ax1.tick_params(axis='x', labelsize=16)
     ax1.tick_params(axis='y', labelsize=16)
@@ -149,6 +156,7 @@ def read_SAS_lc():
     time_all=time3;rate_all=rate3
     index_gti=np.where(rate_all>0)
     time_all=time_all[index_gti];rate_all=rate_all[index_gti]
+
     phase_fold(time_all,rate_all,3733)
     get_LS(time_all,rate_all,freq)
     plot_pds(time_all,rate_all)

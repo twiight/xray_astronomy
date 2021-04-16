@@ -15,6 +15,7 @@ from astropy.io import fits
 # path="/Users/baotong/xmm/M28_LMXB"
 path="/Users/baotong/xmm"
 obsID1 = "0506440101"
+## 改成你的路径及观测号 ##
 # -------------------------------
 
 # ------choose obsID-------------
@@ -38,6 +39,7 @@ combine_spec=0
 
 ra=158.6608260198968;
 dec=39.6411571435408
+##改成你所做的源的坐标
 
 for obsID in obsList:
    os.chdir(path+"/"+obsID)
@@ -101,6 +103,8 @@ for obsID in obsList:
    srcName = "RE1034"
    srcReg = "circle(26542.913,27746.285,900.00032)"
    bkgReg = "circle(29579.517,23754.03,1206.8039)"
+
+   ## 改成你所选取的region ##
 
    if filt_particle_bkg:
       pn_threshold=0.5;mos_threshold=0.4
@@ -212,8 +216,6 @@ for obsID in obsList:
          print(cmd)
          os.system(cmd)
 
-
-
    if spectra:
       for det in detList:
          print("running obsservation"+" "+obsID)
@@ -303,7 +305,7 @@ for obsID in obsList:
          print(" ")
 
 
-
+   ## 合并多个光谱，一般来说你不需要做这一步 ##
    if combine_spec:
       datapath = path + "/" + obsID + "/cal/"
       os.chdir(datapath+'add_2obs_spec/')
