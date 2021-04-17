@@ -20,7 +20,7 @@ Follow the specturm-fitting process of the reference if it has done the specturm
 
 Read xspec_abc.txt for detailed.
 
-You can refer to the manuals (.pdf files in path like /Users/baotong/heasoft-6.27.2/spectral/help/)for the maaning of spectral model and their parameters.
+You can refer to the manuals (.pdf files in path like /Users/baotong/heasoft-6.27.2/spectral/help/) for the meaning of spectral model and their parameters.
 
 # 作业提交
 英文报告，约10分钟
