@@ -139,7 +139,7 @@ def read_SAS_lc():
 
     # 要注意的是，如果在run_XMMproducts_spectra.py中没有自行指定tmin和tmax，这里就不能直接对三个detector的lc进行加减
     dt = 100
-    path='/Users/baotong/xmm/0506440101/cal/'
+    path='/Users/baotong/Downloads/chenying_xmm/'
     os.chdir(path)
     mode=['mos1','mos2','pn']
     filename1=mode[0]+'_lccorr_bin{0}.lc'.format(int(dt));filename2=mode[1]+'_lccorr_bin{0}.lc'.format(int(dt));filename3=mode[2]+'_lccorr_bin{0}.lc'.format(int(dt))
@@ -157,7 +157,7 @@ def read_SAS_lc():
     index_gti=np.where(rate_all>0)
     time_all=time_all[index_gti];rate_all=rate_all[index_gti]
 
-    phase_fold(time_all,rate_all,3733)
+    # phase_fold(time_all,rate_all,3733)
     get_LS(time_all,rate_all,freq)
     plot_pds(time_all,rate_all)
 read_SAS_lc()

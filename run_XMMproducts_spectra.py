@@ -166,6 +166,12 @@ for obsID in obsList:
          print(datapath)
          os.environ['SAS_CCF'] = path + "/" + obsID + "/cal/ccf.cif"
          os.chdir(datapath)
+         ###----define SAS_ODF----------------###
+         with open("SAS.txt",'r') as f:
+            sasname=f.readline()
+         print(sasname)
+         os.environ['SAS_ODF'] = path + "/" + obsID + "/cal/"+sasname[0:-1]
+         ###----------------------------------###
          ##------barycen-----##
          cmd = "cp " + det + "_filt_time.fits " + det + "_filt_time_bary.fits"
          print(cmd)

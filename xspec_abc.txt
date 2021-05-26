@@ -17,9 +17,11 @@ mo tb*(zpowerlw+bbody) ##拟合模型，模型为tbabs*(zpowerlw+bbody)
 new 3 0.042 0    ##将模型的第三个参数（这里是红移）固定在0.042处（这取决于你做的源），第二个0是与freeze 3同等的效果
 fit                 ##开始拟合
 pl ld del           ##plot 并画出残差
-hardcopy RE1034.ps  ##输出图像
 error 3             ##计算参数3，PhoIndex的误差范围
 error 6             ##计算参数6，即黑体温度的误差
+cpd xxx.eps/cps  ##以下三步为输出图像
+plot ld del
+cpd /xs   
 save all test1.xcm  ##保存后方便下次直接载入@test1.xcm
 
 最终的presentaion中应当附有光谱图像，拟合结果（可以做个表格）以及参数的误差范围
